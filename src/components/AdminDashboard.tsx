@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
   Container,
   Paper,
@@ -19,21 +18,25 @@ import {
   Box,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import api from '../services/api';
 
 interface TayinTalebi {
   id: number;
-  userId: number;
-  ad: string;
-  soyad: string;
-  unvan: string;
-  mevcutAdliye: string;
+  basvuruTarihi: string;
   talepEdilenAdliye: string;
   aciklama: string;
-  basvuruTarihi: string;
   talepDurumu: string;
   degerlendirilmeTarihi?: string;
   degerlendirmeNotu?: string;
   isOnaylandi?: boolean;
+  personel: {
+    sicilNo: string;
+    ad: string;
+    soyad: string;
+    unvan: string;
+    mevcutAdliye: string;
+    iseBaslamaTarihi: string;
+  };
 }
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -60,10 +63,11 @@ const AdminDashboard = () => {
 
   const fetchTayinTalepleri = async () => {
     try {
-      const response = await axios.get('http://localhost:5032/api/tayin/all');
+      const response = await api.get('/tayin/all');
       setTayinTalepleri(response.data);
     } catch (error) {
       console.error('Tayin talepleri yüklenirken hata:', error);
+      alert('Tayin talepleri yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
     }
   };
 
@@ -77,14 +81,16 @@ const AdminDashboard = () => {
     if (!selectedTalep) return;
 
     try {
-      await axios.put(`http://localhost:5032/api/tayin/${selectedTalep.id}/degerlendirme`, {
-        isOnaylandi: onay,
+      await api.put(`/tayin/${selectedTalep.id}/degerlendirme`, {
+        talepDurumu: onay ? 'Onaylandı' : 'Reddedildi',
         degerlendirmeNotu: degerlendirmeNotu,
+        isOnaylandi: onay
       });
       setDialogOpen(false);
       fetchTayinTalepleri();
     } catch (error) {
       console.error('Değerlendirme kaydedilirken hata:', error);
+      alert('Değerlendirme kaydedilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
     }
   };
 
@@ -111,10 +117,10 @@ const AdminDashboard = () => {
             <TableBody>
               {tayinTalepleri.map((talep) => (
                 <TableRow key={talep.id}>
-                  <TableCell>{talep.userId}</TableCell>
-                  <TableCell>{`${talep.ad} ${talep.soyad}`}</TableCell>
-                  <TableCell>{talep.unvan}</TableCell>
-                  <TableCell>{talep.mevcutAdliye}</TableCell>
+                  <TableCell>{talep.personel.sicilNo}</TableCell>
+                  <TableCell>{`${talep.personel.ad} ${talep.personel.soyad}`}</TableCell>
+                  <TableCell>{talep.personel.unvan}</TableCell>
+                  <TableCell>{talep.personel.mevcutAdliye}</TableCell>
                   <TableCell>{talep.talepEdilenAdliye}</TableCell>
                   <TableCell>{new Date(talep.basvuruTarihi).toLocaleDateString('tr-TR')}</TableCell>
                   <TableCell>{talep.talepDurumu}</TableCell>
@@ -141,10 +147,10 @@ const AdminDashboard = () => {
         <DialogContent>
           <Box mb={2} mt={1}>
             <Typography variant="body1" gutterBottom>
-              <strong>Personel:</strong> {selectedTalep?.ad} {selectedTalep?.soyad}
+              <strong>Personel:</strong> {selectedTalep?.personel.ad} {selectedTalep?.personel.soyad}
             </Typography>
             <Typography variant="body1" gutterBottom>
-              <strong>Mevcut Adliye:</strong> {selectedTalep?.mevcutAdliye}
+              <strong>Mevcut Adliye:</strong> {selectedTalep?.personel.mevcutAdliye}
             </Typography>
             <Typography variant="body1" gutterBottom>
               <strong>Talep Edilen Adliye:</strong> {selectedTalep?.talepEdilenAdliye}
