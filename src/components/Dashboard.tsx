@@ -21,7 +21,7 @@ import {
   Toolbar,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 
 interface TayinTalebi {
   id: number;
@@ -40,6 +40,7 @@ const Dashboard: React.FC = () => {
     talepEdilenAdliye: '',
     aciklama: '',
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchAdliyeler();
@@ -48,7 +49,7 @@ const Dashboard: React.FC = () => {
 
   const fetchAdliyeler = async () => {
     try {
-      const response = await axios.get('http://localhost:5032/api/tayin/adliyeler');
+      const response = await api.get('/tayin/adliyeler');
       setAdliyeler(response.data);
     } catch (error) {
       console.error('Adliyeler yüklenirken hata oluştu:', error);
@@ -57,25 +58,36 @@ const Dashboard: React.FC = () => {
 
   const fetchTayinTalepleri = async () => {
     try {
-      const response = await axios.get(`http://localhost:5032/api/tayin/user/${user?.id}`);
+      setLoading(true);
+      const response = await api.get('/tayin/my');
       setTayinTalepleri(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Tayin talepleri yüklenirken hata oluştu:', error);
+      const errorMessage = error.response?.data?.message || 'Tayin talepleri yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleTayinTalebi = async () => {
     try {
-      await axios.post('http://localhost:5032/api/tayin', {
-        userId: user?.id,
+      if (!yeniTalep.talepEdilenAdliye) {
+        alert('Lütfen talep edilecek adliyeyi seçin.');
+        return;
+      }
+
+      const response = await api.post('/tayin', {
         talepEdilenAdliye: yeniTalep.talepEdilenAdliye,
         aciklama: yeniTalep.aciklama,
       });
+
       setYeniTalep({ talepEdilenAdliye: '', aciklama: '' });
-      fetchTayinTalepleri();
+      await fetchTayinTalepleri();
       alert('Tayin talebi başarıyla oluşturuldu.');
-    } catch (error) {
-      alert('Tayin talebi oluşturulurken hata oluştu.');
+    } catch (error: any) {
+      console.error('Tayin talebi oluşturma hatası:', error);
+      alert(error.response?.data || 'Tayin talebi oluşturulurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
     }
   };
 

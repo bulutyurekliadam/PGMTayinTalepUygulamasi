@@ -14,7 +14,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (sicilNo: string, password: string) => Promise<void>;
+  login: (sicilNo: string, password: string) => Promise<boolean>;
   logout: () => void;
   register: (userData: any) => Promise<void>;
 }
@@ -36,20 +36,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  }, []);
+
+  useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
     } else {
       localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      delete api.defaults.headers.common['Authorization'];
     }
   }, [user]);
 
-  const login = async (sicilNo: string, password: string) => {
+  const login = async (sicilNo: string, password: string): Promise<boolean> => {
     try {
       const response = await api.post('/auth/login', {
         sicilNo,
         password,
       });
-      setUser(response.data.user);
+      
+      const { token, user: userData } = response.data;
+      localStorage.setItem('token', token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser(userData);
+
+      return userData.isAdmin;
     } catch (error: any) {
       if (error.response) {
         throw error;
@@ -60,6 +75,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete api.defaults.headers.common['Authorization'];
   };
 
   const register = async (userData: any) => {

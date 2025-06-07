@@ -26,7 +26,9 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  return user && user.isAdmin ? <>{children}</> : <Navigate to="/dashboard" />;
+  if (!user) return <Navigate to="/login" />;
+  if (!user.isAdmin) return <Navigate to="/dashboard" />;
+  return <>{children}</>;
 };
 
 function App() {

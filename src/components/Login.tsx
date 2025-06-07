@@ -32,8 +32,8 @@ const Login: React.FC = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
-        await login(values.sicilNo, values.password);
-        navigate('/');
+        const isAdmin = await login(values.sicilNo, values.password);
+        navigate(isAdmin ? '/admin' : '/dashboard');
       } catch (error: any) {
         setError(error.response?.data || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
       }

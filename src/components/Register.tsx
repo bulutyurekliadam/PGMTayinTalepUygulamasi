@@ -54,12 +54,27 @@ export default function Register() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const response = await api.post('/auth/register', formData);
+      // IseBaslamaTarihi'ni ISO formatına çevir
+      const formattedData = {
+        ...formData,
+        iseBaslamaTarihi: new Date(formData.iseBaslamaTarihi).toISOString()
+      };
+      
+      const response = await api.post('/auth/register', formattedData);
       console.log('Kayıt başarılı:', response.data);
       navigate('/login');
     } catch (error: any) {
       console.error('Kayıt hatası:', error);
-      setError(error.response?.data || 'Kayıt sırasında bir hata oluştu');
+      if (error.response?.data?.errors) {
+        // Validation errors
+        const errorMessages = Object.values(error.response.data.errors).flat();
+        setError(errorMessages.join(', '));
+      } else if (error.response?.data) {
+        // Single error message
+        setError(typeof error.response.data === 'string' ? error.response.data : 'Kayıt sırasında bir hata oluştu');
+      } else {
+        setError('Kayıt sırasında bir hata oluştu');
+      }
     }
   };
 
