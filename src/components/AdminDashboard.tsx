@@ -18,6 +18,11 @@ import {
   TextField,
   styled
 } from '@mui/material';
+import {
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  HourglassEmpty as HourglassEmptyIcon
+} from '@mui/icons-material';
 import api from '../services/api';
 
 interface TayinTalebi {
@@ -33,6 +38,7 @@ interface TayinTalebi {
     unvan: string;
     mevcutAdliye: string;
   };
+  isOnaylandi: boolean;
 }
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -40,11 +46,34 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  height: '100%',
+}));
+
+const IconWrapper = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: theme.spacing(2),
+  '& svg': {
+    fontSize: 48,
+    marginRight: theme.spacing(1),
+  },
+}));
+
 const AdminDashboard = () => {
   const [tayinTalepleri, setTayinTalepleri] = useState<TayinTalebi[]>([]);
   const [selectedTalep, setSelectedTalep] = useState<TayinTalebi | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [degerlendirmeNotu, setDegerlendirmeNotu] = useState('');
+  const [stats, setStats] = useState({
+    bekleyen: 0,
+    onaylanan: 0,
+    reddedilen: 0
+  });
 
   useEffect(() => {
     fetchTayinTalepleri();
@@ -53,7 +82,26 @@ const AdminDashboard = () => {
   const fetchTayinTalepleri = async () => {
     try {
       const response = await api.get('/tayin/all');
-      setTayinTalepleri(response.data);
+      const talepler: TayinTalebi[] = response.data;
+      
+      const yeniStats = {
+        bekleyen: 0,
+        onaylanan: 0,
+        reddedilen: 0
+      };
+
+      talepler.forEach(talep => {
+        if (talep.talepDurumu === 'Beklemede') {
+          yeniStats.bekleyen++;
+        } else if (talep.isOnaylandi) {
+          yeniStats.onaylanan++;
+        } else {
+          yeniStats.reddedilen++;
+        }
+      });
+
+      setStats(yeniStats);
+      setTayinTalepleri(talepler);
     } catch (error) {
       console.error('Tayin talepleri yüklenirken hata oluştu:', error);
     }
@@ -80,8 +128,50 @@ const AdminDashboard = () => {
   return (
     <StyledContainer>
       <Typography variant="h4" gutterBottom>
-        Tayin Talepleri Yönetimi
+        Yönetim Paneli
       </Typography>
+      <Box sx={{ 
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: '1fr',
+          md: 'repeat(3, 1fr)'
+        },
+        gap: 4
+      }}>
+        <Box>
+          <StyledPaper elevation={3}>
+            <IconWrapper>
+              <HourglassEmptyIcon sx={{ color: 'warning.main' }} />
+              <Typography variant="h3">{stats.bekleyen}</Typography>
+            </IconWrapper>
+            <Typography variant="h6" align="center">
+              Bekleyen Talepler
+            </Typography>
+          </StyledPaper>
+        </Box>
+        <Box>
+          <StyledPaper elevation={3}>
+            <IconWrapper>
+              <CheckCircleIcon sx={{ color: 'success.main' }} />
+              <Typography variant="h3">{stats.onaylanan}</Typography>
+            </IconWrapper>
+            <Typography variant="h6" align="center">
+              Onaylanan Talepler
+            </Typography>
+          </StyledPaper>
+        </Box>
+        <Box>
+          <StyledPaper elevation={3}>
+            <IconWrapper>
+              <CancelIcon sx={{ color: 'error.main' }} />
+              <Typography variant="h3">{stats.reddedilen}</Typography>
+            </IconWrapper>
+            <Typography variant="h6" align="center">
+              Reddedilen Talepler
+            </Typography>
+          </StyledPaper>
+        </Box>
+      </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>

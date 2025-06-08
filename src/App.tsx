@@ -12,6 +12,9 @@ import Requests from './components/Requests';
 import NewRequest from './components/NewRequest';
 import './App.css';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import AdminDashboard from './components/AdminDashboard';
+import AllRequests from './components/AllRequests';
+import Users from './components/Users';
 
 // Protected Route bileşeni
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -44,7 +47,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/" element={<Navigate to="/login" />} />
             
             <Route path="/dashboard" element={
               <ProtectedRoute>
@@ -81,7 +84,21 @@ const App: React.FC = () => {
             <Route path="/admin" element={
               <AdminRoute>
                 <Dashboard>
-                  <Home />
+                  <AdminDashboard />
+                </Dashboard>
+              </AdminRoute>
+            } />
+            <Route path="/admin/requests" element={
+              <AdminRoute>
+                <Dashboard>
+                  <AllRequests />
+                </Dashboard>
+              </AdminRoute>
+            } />
+            <Route path="/admin/users" element={
+              <AdminRoute>
+                <Dashboard>
+                  <Users />
                 </Dashboard>
               </AdminRoute>
             } />
