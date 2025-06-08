@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('token', token);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(user);
-      return true;
+      return user.isAdmin;
     } catch (error: any) {
       if (error.response) {
         throw new Error(error.response.data.message || 'Giriş başarısız');

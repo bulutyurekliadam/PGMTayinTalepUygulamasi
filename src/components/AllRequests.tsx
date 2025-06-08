@@ -35,6 +35,7 @@ interface TayinTalebi {
     unvan: string;
     mevcutAdliye: string;
   };
+  isOnaylandi: boolean;
 }
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -94,8 +95,9 @@ const AllRequests = () => {
 
     try {
       await api.put(`/tayin/${selectedTalep.id}/degerlendirme`, {
-        onay,
-        degerlendirmeNotu
+        talepDurumu: onay ? 'Onaylandı' : 'Reddedildi',
+        degerlendirmeNotu,
+        isOnaylandi: onay
       });
       
       await fetchTayinTalepleri();
@@ -108,6 +110,26 @@ const AllRequests = () => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('tr-TR');
+  };
+
+  const getDurumText = (durum: string, isOnaylandi: boolean) => {
+    if (durum === 'Beklemede') {
+      return 'Beklemede';
+    } else if (isOnaylandi) {
+      return 'Onaylandı';
+    } else {
+      return 'Reddedildi';
+    }
+  };
+
+  const getDurumClassName = (durum: string, isOnaylandi: boolean) => {
+    if (durum === 'Beklemede') {
+      return 'beklemede';
+    } else if (isOnaylandi) {
+      return 'onaylandi';
+    } else {
+      return 'reddedildi';
+    }
   };
 
   return (
@@ -142,18 +164,21 @@ const AllRequests = () => {
                 <TableCell>{talep.talepEdilenAdliye}</TableCell>
                 <TableCell>
                   <StyledChip
-                    label={talep.talepDurumu}
-                    className={talep.talepDurumu.toLowerCase()}
+                    label={getDurumText(talep.talepDurumu, talep.isOnaylandi)}
+                    className={getDurumClassName(talep.talepDurumu, talep.isOnaylandi)}
                   />
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => handleTalepDetay(talep)}
-                  >
-                    Detay
-                  </Button>
+                  {talep.talepDurumu === 'Beklemede' && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => handleTalepDetay(talep)}
+                    >
+                      Değerlendir
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

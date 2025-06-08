@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Container,
   Typography,
-  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  styled
+  Paper,
+  Chip
 } from '@mui/material';
+import styled from '@emotion/styled';
 import api from '../services/api';
+
+const StyledContainer = styled.div`
+  padding: 20px;
+`;
 
 interface User {
   id: number;
@@ -21,16 +25,10 @@ interface User {
   unvan: string;
   mevcutAdliye: string;
   iseBaslamaTarihi: string;
-  email: string;
-  rol: string;
+  isAdmin: boolean;
 }
 
-const StyledContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  marginBottom: theme.spacing(4),
-}));
-
-const Users = () => {
+const Users: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
@@ -42,13 +40,12 @@ const Users = () => {
       const response = await api.get('/users');
       setUsers(response.data);
     } catch (error) {
-      console.error('Kullanıcılar yüklenirken hata oluştu:', error);
+      console.error('Kullanıcılar getirilirken hata:', error);
     }
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('tr-TR');
+    return new Date(dateString).toLocaleDateString('tr-TR');
   };
 
   const calculateServiceTime = (startDate: string) => {
@@ -71,7 +68,7 @@ const Users = () => {
   return (
     <StyledContainer>
       <Typography variant="h4" gutterBottom>
-        Sistem Kullanıcıları
+        Kullanıcılar
       </Typography>
       <TableContainer component={Paper}>
         <Table>
@@ -80,24 +77,28 @@ const Users = () => {
               <TableCell>Sicil No</TableCell>
               <TableCell>Ad Soyad</TableCell>
               <TableCell>Unvan</TableCell>
-              <TableCell>Adliye</TableCell>
-              <TableCell>E-posta</TableCell>
+              <TableCell>Mevcut Adliye</TableCell>
               <TableCell>İşe Başlama Tarihi</TableCell>
               <TableCell>Hizmet Süresi</TableCell>
-              <TableCell>Rol</TableCell>
+              <TableCell>Yetki</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>{user.sicilNo}</TableCell>
-                <TableCell>{`${user.ad} ${user.soyad}`}</TableCell>
+                <TableCell>{user.ad} {user.soyad}</TableCell>
                 <TableCell>{user.unvan}</TableCell>
                 <TableCell>{user.mevcutAdliye}</TableCell>
-                <TableCell>{user.email}</TableCell>
                 <TableCell>{formatDate(user.iseBaslamaTarihi)}</TableCell>
                 <TableCell>{calculateServiceTime(user.iseBaslamaTarihi)}</TableCell>
-                <TableCell>{user.rol}</TableCell>
+                <TableCell>
+                  <Chip 
+                    label={user.isAdmin ? "Admin" : "Kullanıcı"}
+                    color={user.isAdmin ? "primary" : "default"}
+                    size="small"
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -55,14 +55,12 @@ const Home: React.FC = () => {
     };
 
     talepler.forEach(talep => {
-      if (talep.talepDurumu === 'Değerlendirildi') {
-        if (talep.isOnaylandi) {
-          durum.onaylandi++;
-        } else {
-          durum.reddedildi++;
-        }
-      } else {
+      if (talep.talepDurumu === 'Beklemede') {
         durum.beklemede++;
+      } else if (talep.isOnaylandi) {
+        durum.onaylandi++;
+      } else {
+        durum.reddedildi++;
       }
     });
 

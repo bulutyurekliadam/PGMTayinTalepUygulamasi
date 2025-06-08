@@ -13,8 +13,24 @@ import {
   Paper,
   Chip
 } from '@mui/material';
+import styled from '@emotion/styled';
 import api from '../services/api';
 import '../styles/Requests.css';
+
+const StyledChip = styled(Chip)`
+  &.beklemede {
+    background-color: #ffd700;
+    color: #000;
+  }
+  &.onaylandi {
+    background-color: #4caf50;
+    color: #fff;
+  }
+  &.reddedildi {
+    background-color: #f44336;
+    color: #fff;
+  }
+`;
 
 interface TayinTalebi {
   id: number;
@@ -37,78 +53,77 @@ const Requests: React.FC = () => {
         const response = await api.get('/tayin/my');
         setTalepler(response.data);
       } catch (error) {
-        console.error('Talepler yüklenirken hata oluştu:', error);
+        console.error('Talepler getirilirken hata:', error);
       }
     };
 
     fetchTalepler();
   }, []);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('tr-TR');
+  const getDurumText = (durum: string, isOnaylandi: boolean) => {
+    if (durum === 'Beklemede') {
+      return 'Beklemede';
+    } else if (isOnaylandi) {
+      return 'Onaylandı';
+    } else {
+      return 'Reddedildi';
+    }
   };
 
-  const getDurumChipColor = (durum: string, isOnaylandi: boolean) => {
-    if (durum === 'Değerlendirildi') {
-      return isOnaylandi ? 'success' : 'error';
+  const getDurumClassName = (durum: string, isOnaylandi: boolean) => {
+    if (durum === 'Beklemede') {
+      return 'beklemede';
+    } else if (isOnaylandi) {
+      return 'onaylandi';
+    } else {
+      return 'reddedildi';
     }
-    return 'warning';
   };
 
   return (
-    <div className="requests-container">
-      <Typography variant="h4" gutterBottom>
-        Taleplerim
-      </Typography>
-      <Card>
-        <CardContent>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Talep Edilen Adliye</TableCell>
-                  <TableCell>Başvuru Tarihi</TableCell>
-                  <TableCell>Açıklama</TableCell>
-                  <TableCell>Durum</TableCell>
-                  <TableCell>Değerlendirme</TableCell>
+    <Card>
+      <CardContent>
+        <Typography variant="h5" gutterBottom>
+          Taleplerim
+        </Typography>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Başvuru Tarihi</TableCell>
+                <TableCell>Talep Edilen Adliye</TableCell>
+                <TableCell>Açıklama</TableCell>
+                <TableCell>Durum</TableCell>
+                <TableCell>Değerlendirilme Tarihi</TableCell>
+                <TableCell>Değerlendirme Notu</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {talepler.map((talep) => (
+                <TableRow key={talep.id}>
+                  <TableCell>{new Date(talep.basvuruTarihi).toLocaleDateString('tr-TR')}</TableCell>
+                  <TableCell>{talep.talepEdilenAdliye}</TableCell>
+                  <TableCell>{talep.aciklama}</TableCell>
+                  <TableCell>
+                    <StyledChip
+                      label={getDurumText(talep.talepDurumu, talep.isOnaylandi)}
+                      className={getDurumClassName(talep.talepDurumu, talep.isOnaylandi)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {talep.degerlendirilmeTarihi 
+                      ? new Date(talep.degerlendirilmeTarihi).toLocaleDateString('tr-TR')
+                      : '-'
+                    }
+                  </TableCell>
+                  <TableCell>{talep.degerlendirmeNotu || '-'}</TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {talepler.map((talep) => (
-                  <TableRow key={talep.id}>
-                    <TableCell>{talep.talepEdilenAdliye}</TableCell>
-                    <TableCell>{formatDate(talep.basvuruTarihi)}</TableCell>
-                    <TableCell>{talep.aciklama}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={talep.talepDurumu}
-                        color={getDurumChipColor(talep.talepDurumu, talep.isOnaylandi)}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {talep.degerlendirilmeTarihi ? (
-                        <>
-                          <Typography variant="body2" color="textSecondary">
-                            {formatDate(talep.degerlendirilmeTarihi)}
-                          </Typography>
-                          <Typography variant="body2">
-                            {talep.degerlendirmeNotu}
-                          </Typography>
-                        </>
-                      ) : (
-                        '-'
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
-    </div>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </CardContent>
+    </Card>
   );
 };
 
