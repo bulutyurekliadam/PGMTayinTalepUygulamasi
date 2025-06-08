@@ -1,0 +1,45 @@
+.requests-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.requests-container .MuiCard-root {
+  margin-top: 24px;
+}
+
+.requests-container .MuiTableCell-head {
+  font-weight: 600;
+  background-color: #f5f5f5;
+}
+
+.requests-container .MuiChip-root {
+  min-width: 100px;
+  justify-content: center;
+}
+
+.requests-container .MuiTypography-body2 {
+  margin-top: 4px;
+}
+
+.requests-table {
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.requests-table .MuiTableHead-root {
+  background-color: #f5f5f5;
+}
+
+.requests-table .MuiTableCell-head {
+  font-weight: 600;
+  color: #1a237e;
+}
+
+.requests-table .MuiTableRow-root:hover {
+  background-color: #f8f8f8;
+}
+
+.requests-table .MuiChip-icon {
+  margin-right: 4px;
+} 

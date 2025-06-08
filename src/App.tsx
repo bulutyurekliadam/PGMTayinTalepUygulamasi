@@ -1,37 +1,41 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
+import Home from './components/Home';
+import Profile from './components/Profile';
+import Requests from './components/Requests';
+import NewRequest from './components/NewRequest';
+import './App.css';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import AdminDashboard from './components/AdminDashboard';
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
-
-const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Protected Route bileşeni
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  return user ? <>{children}</> : <Navigate to="/login" />;
-};
-
-const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" />;
-  if (!user.isAdmin) return <Navigate to="/dashboard" />;
+  
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+  
   return <>{children}</>;
 };
 
-function App() {
+// Admin Route bileşeni
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+  
+  if (!user || !user.isAdmin) {
+    return <Navigate to="/dashboard" />;
+  }
+  
+  return <>{children}</>;
+};
+
+const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -40,28 +44,52 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              }
-            />
-            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard>
+                  <Home />
+                </Dashboard>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/dashboard/profile" element={
+              <ProtectedRoute>
+                <Dashboard>
+                  <Profile />
+                </Dashboard>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/dashboard/requests" element={
+              <ProtectedRoute>
+                <Dashboard>
+                  <Requests />
+                </Dashboard>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/dashboard/new-request" element={
+              <ProtectedRoute>
+                <Dashboard>
+                  <NewRequest />
+                </Dashboard>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin" element={
+              <AdminRoute>
+                <Dashboard>
+                  <Home />
+                </Dashboard>
+              </AdminRoute>
+            } />
           </Routes>
         </Router>
       </AuthProvider>
     </ThemeProvider>
   );
-}
+};
 
 export default App;

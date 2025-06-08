@@ -239,7 +239,7 @@ export default function Register() {
               </Button>
             </GridItem>
           </StyledGrid>
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Link href="/login" variant="body2">
               Zaten hesabınız var mı? Giriş yapın
             </Link>

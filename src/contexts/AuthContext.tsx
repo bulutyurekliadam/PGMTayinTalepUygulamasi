@@ -54,20 +54,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (sicilNo: string, password: string): Promise<boolean> => {
     try {
-      const response = await api.post('/auth/login', {
-        sicilNo,
-        password,
-      });
+      const response = await api.post('/auth/login', { sicilNo, password });
+      const { token, user } = response.data;
       
-      const { token, user: userData } = response.data;
       localStorage.setItem('token', token);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(userData);
-
-      return userData.isAdmin;
+      setUser(user);
+      return true;
     } catch (error: any) {
       if (error.response) {
-        throw error;
+        throw new Error(error.response.data.message || 'Giriş başarısız');
       }
       throw new Error('Giriş başarısız. Lütfen daha sonra tekrar deneyin.');
     }
@@ -86,18 +82,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return response.data;
     } catch (error: any) {
       if (error.response) {
-        throw error;
+        throw new Error(error.response.data.message || 'Kayıt başarısız');
       }
       throw new Error('Kayıt başarısız. Lütfen daha sonra tekrar deneyin.');
     }
   };
 
-  const value = {
-    user,
-    login,
-    logout,
-    register,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, login, logout, register }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }; 

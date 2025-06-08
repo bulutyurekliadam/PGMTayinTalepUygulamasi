@@ -28,10 +28,24 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/login';
+        if (error.response) {
+            // Token geçersiz veya süresi dolmuşsa
+            if (error.response.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                delete api.defaults.headers.common['Authorization'];
+                window.location.href = '/login';
+            }
+            // Sunucu hatası
+            else if (error.response.status === 500) {
+                console.error('Sunucu hatası:', error.response.data);
+            }
+        } else if (error.request) {
+            // Sunucuya ulaşılamadı
+            console.error('Sunucuya ulaşılamadı:', error.request);
+        } else {
+            // İstek oluşturulurken hata
+            console.error('İstek hatası:', error.message);
         }
         return Promise.reject(error);
     }

@@ -15,11 +15,11 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const validationSchema = yup.object({
-  sicilNo: yup.string().required('Sicil numarası zorunludur'),
-  password: yup.string().required('Şifre zorunludur'),
+  sicilNo: yup.string().required('Sicil numarası gereklidir'),
+  password: yup.string().required('Şifre gereklidir'),
 });
 
-const Login: React.FC = () => {
+const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [error, setError] = useState<string>('');
@@ -67,13 +67,10 @@ const Login: React.FC = () => {
           <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1 }}>
             <TextField
               margin="normal"
-              required
               fullWidth
               id="sicilNo"
-              label="Sicil Numarası"
               name="sicilNo"
-              autoComplete="sicilNo"
-              autoFocus
+              label="Sicil No"
               value={formik.values.sicilNo}
               onChange={formik.handleChange}
               error={formik.touched.sicilNo && Boolean(formik.errors.sicilNo)}
@@ -81,13 +78,11 @@ const Login: React.FC = () => {
             />
             <TextField
               margin="normal"
-              required
               fullWidth
+              id="password"
               name="password"
               label="Şifre"
               type="password"
-              id="password"
-              autoComplete="current-password"
               value={formik.values.password}
               onChange={formik.handleChange}
               error={formik.touched.password && Boolean(formik.errors.password)}
@@ -101,9 +96,9 @@ const Login: React.FC = () => {
             >
               Giriş Yap
             </Button>
-            <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Link component={RouterLink} to="/register" variant="body2">
-                {"Hesabınız yok mu? Kayıt olun"}
+                Hesabınız yok mu? Kayıt olun
               </Link>
             </Box>
           </Box>

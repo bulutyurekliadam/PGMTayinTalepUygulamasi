@@ -1,191 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Container,
   Box,
-  Typography,
-  Button,
-  Paper,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  Drawer,
   AppBar,
   Toolbar,
+  List,
+  Typography,
+  Divider,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
+import {
+  Home as HomeIcon,
+  Person as PersonIcon,
+  Description as DescriptionIcon,
+  Add as AddIcon,
+  ExitToApp as LogoutIcon,
+  SupervisorAccount as AdminIcon,
+} from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
 
-interface TayinTalebi {
-  id: number;
-  talepEdilenAdliye: string;
-  basvuruTarihi: string;
-  talepDurumu: string;
-  aciklama?: string;
+interface DashboardProps {
+  children: React.ReactNode;
 }
 
-const Dashboard: React.FC = () => {
+const Dashboard: React.FC<DashboardProps> = ({ children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
-  const [adliyeler, setAdliyeler] = useState<string[]>([]);
-  const [tayinTalepleri, setTayinTalepleri] = useState<TayinTalebi[]>([]);
-  const [yeniTalep, setYeniTalep] = useState({
-    talepEdilenAdliye: '',
-    aciklama: '',
-  });
-  const [loading, setLoading] = useState(false);
+  const drawerWidth = 240;
 
-  useEffect(() => {
-    fetchAdliyeler();
-    fetchTayinTalepleri();
-  }, []);
-
-  const fetchAdliyeler = async () => {
+  const handleLogout = async () => {
     try {
-      const response = await api.get('/tayin/adliyeler');
-      setAdliyeler(response.data);
+      await logout();
+      navigate('/login');
     } catch (error) {
-      console.error('Adliyeler yüklenirken hata oluştu:', error);
+      console.error('Çıkış yapılırken bir hata oluştu:', error);
     }
   };
 
-  const fetchTayinTalepleri = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get('/tayin/my');
-      setTayinTalepleri(response.data);
-    } catch (error: any) {
-      console.error('Tayin talepleri yüklenirken hata oluştu:', error);
-      const errorMessage = error.response?.data?.message || 'Tayin talepleri yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
-      alert(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const userMenuItems = [
+    { text: 'Ana Sayfa', icon: <HomeIcon />, path: '/dashboard' },
+    { text: 'Profilim', icon: <PersonIcon />, path: '/dashboard/profile' },
+    { text: 'Taleplerim', icon: <DescriptionIcon />, path: '/dashboard/requests' },
+    { text: 'Yeni Talep', icon: <AddIcon />, path: '/dashboard/new-request' },
+  ];
 
-  const handleTayinTalebi = async () => {
-    try {
-      if (!yeniTalep.talepEdilenAdliye) {
-        alert('Lütfen talep edilecek adliyeyi seçin.');
-        return;
-      }
+  const adminMenuItems = [
+    { text: 'Yönetim Paneli', icon: <AdminIcon />, path: '/admin' },
+    { text: 'Tüm Talepler', icon: <DescriptionIcon />, path: '/admin/requests' },
+    { text: 'Kullanıcılar', icon: <PersonIcon />, path: '/admin/users' },
+  ];
 
-      const response = await api.post('/tayin', {
-        talepEdilenAdliye: yeniTalep.talepEdilenAdliye,
-        aciklama: yeniTalep.aciklama,
-      });
-
-      setYeniTalep({ talepEdilenAdliye: '', aciklama: '' });
-      await fetchTayinTalepleri();
-      alert('Tayin talebi başarıyla oluşturuldu.');
-    } catch (error: any) {
-      console.error('Tayin talebi oluşturma hatası:', error);
-      alert(error.response?.data || 'Tayin talebi oluşturulurken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const menuItems = user?.isAdmin ? adminMenuItems : userMenuItems;
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+    <Box sx={{ display: 'flex' }}>
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Personel Tayin Talep Sistemi
+          <Typography variant="h6" noWrap component="div">
+            Adalet Bakanlığı Tayin Sistemi
           </Typography>
-          <Button color="inherit" onClick={handleLogout}>
-            Çıkış Yap
-          </Button>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Paper sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h6" gutterBottom>
-            Personel Bilgileri
-          </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-            <Typography>Ad Soyad: {user?.ad} {user?.soyad}</Typography>
-            <Typography>Sicil No: {user?.sicilNo}</Typography>
-            <Typography>Unvan: {user?.unvan}</Typography>
-            <Typography>Mevcut Adliye: {user?.mevcutAdliye}</Typography>
-          </Box>
-        </Paper>
-
-        <Paper sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h6" gutterBottom>
-            Yeni Tayin Talebi
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel>Talep Edilen Adliye</InputLabel>
-              <Select
-                value={yeniTalep.talepEdilenAdliye}
-                label="Talep Edilen Adliye"
-                onChange={(e) => setYeniTalep({ ...yeniTalep, talepEdilenAdliye: e.target.value })}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+          },
+        }}
+      >
+        <Toolbar />
+        <Box sx={{ overflow: 'auto' }}>
+          <List>
+            {menuItems.map((item) => (
+              <ListItemButton
+                key={item.text}
+                onClick={() => navigate(item.path)}
+                selected={location.pathname === item.path}
               >
-                {adliyeler.map((adliye) => (
-                  <MenuItem key={adliye} value={adliye}>
-                    {adliye}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              fullWidth
-              label="Açıklama"
-              multiline
-              rows={4}
-              value={yeniTalep.aciklama}
-              onChange={(e) => setYeniTalep({ ...yeniTalep, aciklama: e.target.value })}
-            />
-            <Button
-              variant="contained"
-              onClick={handleTayinTalebi}
-              disabled={!yeniTalep.talepEdilenAdliye}
-            >
-              Tayin Talebi Oluştur
-            </Button>
-          </Box>
-        </Paper>
-
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Tayin Talepleri
-          </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Başvuru Tarihi</TableCell>
-                  <TableCell>Talep Edilen Adliye</TableCell>
-                  <TableCell>Durum</TableCell>
-                  <TableCell>Açıklama</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tayinTalepleri.map((talep) => (
-                  <TableRow key={talep.id}>
-                    <TableCell>{new Date(talep.basvuruTarihi).toLocaleDateString('tr-TR')}</TableCell>
-                    <TableCell>{talep.talepEdilenAdliye}</TableCell>
-                    <TableCell>{talep.talepDurumu}</TableCell>
-                    <TableCell>{talep.aciklama}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-      </Container>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            ))}
+          </List>
+          <Divider />
+          <List>
+            <ListItemButton onClick={handleLogout}>
+              <ListItemIcon><LogoutIcon /></ListItemIcon>
+              <ListItemText primary="Çıkış Yap" />
+            </ListItemButton>
+          </List>
+        </Box>
+      </Drawer>
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Toolbar />
+        {children}
+      </Box>
     </Box>
   );
 };
