@@ -20,6 +20,7 @@ import {
   styled
 } from '@mui/material';
 import api from '../services/api';
+import { format } from 'date-fns';
 
 interface TayinTalebi {
   id: number;
@@ -107,9 +108,15 @@ const AllRequests = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('tr-TR');
+  const formatDateTime = (dateString: string | undefined | null) => {
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      return format(date, 'dd.MM.yyyy HH:mm');
+    } catch (error) {
+      console.error('Tarih formatlanırken hata:', error);
+      return dateString || '-';
+    }
   };
 
   const getDurumText = (durum: string, isOnaylandi: boolean) => {
@@ -152,7 +159,7 @@ const AllRequests = () => {
           <TableBody>
             {tayinTalepleri.map((talep) => (
               <TableRow key={talep.id}>
-                <TableCell>{formatDate(talep.basvuruTarihi)}</TableCell>
+                <TableCell>{formatDateTime(talep.basvuruTarihi)}</TableCell>
                 <TableCell>
                   {talep.personel.sicilNo} - {talep.personel.ad} {talep.personel.soyad}
                   <br />

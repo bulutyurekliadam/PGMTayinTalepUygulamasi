@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Paper, Typography, Box } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import {
   Assignment as AssignmentIcon,
   CheckCircle as CheckCircleIcon,
@@ -36,31 +36,32 @@ const DashboardCards = () => {
   ];
 
   return (
-    <Grid container spacing={3}>
-      {cards.map((card) => (
-        <Grid component="div" item xs={12} sm={6} md={3} key={card.title}>
+    <Box sx={{ flexGrow: 1, mb: 4 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 3 }}>
+        {cards.map((card) => (
           <Paper
+            key={card.title}
             sx={{
               p: 2,
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              backgroundColor: card.color,
-              minHeight: 120
+              bgcolor: card.color,
+              borderRadius: 2,
+              boxShadow: 3
             }}
           >
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" component="div">
-                {card.title}
-              </Typography>
-              <Typography variant="h4" component="div">
-                {card.value}
-              </Typography>
-            </Box>
-            <Box sx={{ ml: 2 }}>{card.icon}</Box>
+            {card.icon}
+            <Typography variant="h6" component="div" sx={{ mt: 2 }}>
+              {card.title}
+            </Typography>
+            <Typography variant="h4" component="div" sx={{ mt: 1 }}>
+              {card.value}
+            </Typography>
           </Paper>
-        </Grid>
-      ))}
-    </Grid>
+        ))}
+      </Box>
+    </Box>
   );
 };
 

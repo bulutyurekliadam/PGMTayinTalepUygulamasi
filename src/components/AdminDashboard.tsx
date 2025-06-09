@@ -5,7 +5,12 @@ import {
   Tab,
   Box,
   Paper,
-  Typography
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  Chip
 } from '@mui/material';
 import AllRequests from './AllRequests';
 import Users from './Users';
@@ -13,6 +18,7 @@ import api from '../services/api';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { format } from 'date-fns';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -45,6 +51,17 @@ function TabPanel(props: TabPanelProps) {
     </div>
   );
 }
+
+const formatDateTime = (dateString: string | undefined | null) => {
+  if (!dateString) return '-';
+  try {
+    const date = new Date(dateString);
+    return format(date, 'dd.MM.yyyy HH:mm');
+  } catch (error) {
+    console.error('Tarih formatlanırken hata:', error);
+    return dateString || '-';
+  }
+};
 
 const AdminDashboard: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState(0);

@@ -1,93 +1,67 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Box, useTheme, Divider, Avatar } from '@mui/material';
-import GavelIcon from '@mui/icons-material/Gavel';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import PersonIcon from '@mui/icons-material/Person';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { AppBar, Toolbar, Typography, Button, Box, useTheme } from '@mui/material';
+import { GavelRounded, ExitToApp as ExitToAppIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useThemeMode } from '../contexts/ThemeContext';
 
-const Header = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { user, logout } = useAuth();
+interface HeaderProps {
+  title: string;
+}
+
+const Header: React.FC<HeaderProps> = ({ title }) => {
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
-  const { toggleTheme } = useThemeMode();
-
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleLogout = () => {
     logout();
     navigate('/login');
-    handleClose();
   };
 
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <GavelIcon sx={{ mr: 2 }} />
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Adalet Bakanlığı Tayin Sistemi
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="body1" sx={{ display: { xs: 'none', sm: 'block' } }}>
-            Hoş geldiniz, {user?.ad} {user?.soyad}
+    <AppBar 
+      position="static" 
+      sx={{ 
+        mb: 3,
+        backgroundColor: theme.palette.primary.main,
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}
+    >
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <GavelRounded sx={{ 
+            mr: 2, 
+            fontSize: '2rem',
+            color: theme.palette.primary.contrastText 
+          }} />
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ 
+              fontWeight: 600,
+              color: theme.palette.primary.contrastText
+            }}
+          >
+            {title}
           </Typography>
-
-          <IconButton onClick={toggleTheme} color="inherit">
-            {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-          </IconButton>
-
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton
-              size="large"
-              aria-label="kullanıcı hesabı"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-                {user?.ad?.[0]}{user?.soyad?.[0]}
-              </Avatar>
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={() => { navigate('/profile'); handleClose(); }}>
-                <PersonIcon sx={{ mr: 1 }} />
-                Profil
-              </MenuItem>
-              <Divider />
-              <MenuItem onClick={handleLogout}>
-                <ExitToAppIcon sx={{ mr: 1 }} />
-                Çıkış Yap
-              </MenuItem>
-            </Menu>
-          </Box>
         </Box>
+        
+        <Button 
+          color="inherit" 
+          onClick={handleLogout}
+          startIcon={<ExitToAppIcon />}
+          sx={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            },
+            borderRadius: '8px',
+            padding: '8px 16px',
+            fontWeight: 500
+          }}
+        >
+          Çıkış Yap
+        </Button>
       </Toolbar>
     </AppBar>
   );

@@ -16,6 +16,8 @@ import {
 import styled from '@emotion/styled';
 import api from '../services/api';
 import '../styles/Requests.css';
+import { format } from 'date-fns';
+import { tr } from 'date-fns/locale/tr';
 
 const StyledChip = styled(Chip)`
   &.beklemede {
@@ -80,6 +82,17 @@ const Requests: React.FC = () => {
     }
   };
 
+  const formatDateTime = (dateString: string | undefined | null) => {
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      return format(date, 'dd.MM.yyyy HH:mm');
+    } catch (error) {
+      console.error('Tarih formatlanırken hata:', error);
+      return dateString || '-';
+    }
+  };
+
   return (
     <Card>
       <CardContent>
@@ -101,7 +114,7 @@ const Requests: React.FC = () => {
             <TableBody>
               {talepler.map((talep) => (
                 <TableRow key={talep.id}>
-                  <TableCell>{new Date(talep.basvuruTarihi).toLocaleDateString('tr-TR')}</TableCell>
+                  <TableCell>{formatDateTime(talep.basvuruTarihi)}</TableCell>
                   <TableCell>{talep.talepEdilenAdliye}</TableCell>
                   <TableCell>{talep.aciklama}</TableCell>
                   <TableCell>
@@ -110,12 +123,7 @@ const Requests: React.FC = () => {
                       className={getDurumClassName(talep.talepDurumu, talep.isOnaylandi)}
                     />
                   </TableCell>
-                  <TableCell>
-                    {talep.degerlendirilmeTarihi 
-                      ? new Date(talep.degerlendirilmeTarihi).toLocaleDateString('tr-TR')
-                      : '-'
-                    }
-                  </TableCell>
+                  <TableCell>{formatDateTime(talep.degerlendirilmeTarihi)}</TableCell>
                   <TableCell>{talep.degerlendirmeNotu || '-'}</TableCell>
                 </TableRow>
               ))}
