@@ -13,11 +13,17 @@ import {
   MenuItem,
   styled,
   Alert,
-  Grid
+  Grid,
+  ContainerProps
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import GavelIcon from '@mui/icons-material/Gavel';
 import api from '../services/api';
+import { GavelRounded } from '@mui/icons-material';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { tr } from 'date-fns/locale';
 
 const StyledGrid = styled('div')(({ theme }) => ({
   display: 'grid',
@@ -32,62 +38,87 @@ const GridItem = styled('div')<{ sm?: number }>(({ theme, sm }) => ({
   },
 }));
 
-interface RegisterFormData {
+interface FormValues {
   sicilNo: string;
   password: string;
   ad: string;
   soyad: string;
   unvan: string;
   mevcutAdliye: string;
-  iseBaslamaTarihi: string;
+  iseBaslamaTarihi: Date | null;
 }
+
+const validationSchema = yup.object({
+  sicilNo: yup
+    .string()
+    .required('Sicil no zorunludur')
+    .matches(/^[aA][bB]/, 'Sicil no "AB" ile başlamalıdır')
+    .matches(/^[aA][bB][0-9]{6}$/, 'Sicil no "AB" ile başlamalı ve 6 rakam içermelidir')
+    .test('range', 'Sicil no 23000 ile 999999 arasında olmalıdır', (value) => {
+      if (!value) return false;
+      const numericPart = parseInt(value.substring(2));
+      return numericPart >= 23000 && numericPart <= 999999;
+    }),
+  password: yup
+    .string()
+    .required('Şifre zorunludur')
+    .min(8, 'Şifre en az 8 karakter olmalıdır')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      'Şifre en az bir büyük harf, bir küçük harf, bir rakam ve bir özel karakter (@$!%*?&) içermelidir'
+    ),
+  ad: yup.string().required('Ad zorunludur'),
+  soyad: yup.string().required('Soyad zorunludur'),
+  unvan: yup.string().required('Ünvan zorunludur'),
+  mevcutAdliye: yup.string().required('Mevcut adliye zorunludur'),
+  iseBaslamaTarihi: yup.date().nullable().required('İşe başlama tarihi zorunludur'),
+});
+
+const StyledContainer = styled(Container)<ContainerProps>(({ theme }) => ({
+  marginTop: theme.spacing(8),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+}));
 
 export default function Register() {
   const navigate = useNavigate();
   const [error, setError] = useState<string>('');
-  const [formData, setFormData] = useState<RegisterFormData>({
-    sicilNo: '',
-    password: '',
-    ad: '',
-    soyad: '',
-    unvan: '',
-    mevcutAdliye: '',
-    iseBaslamaTarihi: ''
-  });
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    try {
-      // IseBaslamaTarihi'ni ISO formatına çevir
-      const formattedData = {
-        ...formData,
-        iseBaslamaTarihi: new Date(formData.iseBaslamaTarihi).toISOString()
-      };
-      
-      const response = await api.post('/auth/register', formattedData);
-      console.log('Kayıt başarılı:', response.data);
-      navigate('/login');
-    } catch (error: any) {
-      console.error('Kayıt hatası:', error);
-      if (error.response?.data?.errors) {
-        // Validation errors
-        const errorMessages = Object.values(error.response.data.errors).flat();
-        setError(errorMessages.join(', '));
-      } else if (error.response?.data) {
-        // Single error message
-        setError(typeof error.response.data === 'string' ? error.response.data : 'Kayıt sırasında bir hata oluştu');
-      } else {
-        setError('Kayıt sırasında bir hata oluştu');
+  const formik = useFormik<FormValues>({
+    initialValues: {
+      sicilNo: '',
+      password: '',
+      ad: '',
+      soyad: '',
+      unvan: '',
+      mevcutAdliye: '',
+      iseBaslamaTarihi: null,
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      try {
+        const formattedData = {
+          ...values,
+          iseBaslamaTarihi: values.iseBaslamaTarihi ? values.iseBaslamaTarihi.toISOString() : null
+        };
+        
+        const response = await api.post('/auth/register', formattedData);
+        console.log('Kayıt başarılı:', response.data);
+        navigate('/login');
+      } catch (error: any) {
+        console.error('Kayıt hatası:', error);
+        if (error.response?.data?.message) {
+          setError(error.response.data.message);
+        } else if (error.response?.data?.errors) {
+          const errorMessages = Object.values(error.response.data.errors).flat();
+          setError(errorMessages.join(', '));
+        } else {
+          setError('Kayıt sırasında bir hata oluştu');
+        }
       }
-    }
-  };
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value
-    });
-  };
+    },
+  });
 
   const adliyeler = [
     "Adana Adliyesi", "Adıyaman Adliyesi", "Afyonkarahisar Adliyesi", "Ağrı Adliyesi", "Amasya Adliyesi", "Ankara Adliyesi", "Antalya Adliyesi", "Artvin Adliyesi",
@@ -120,26 +151,30 @@ export default function Register() {
   ];
 
   return (
-    <Container maxWidth="xs">
+    <StyledContainer component="main" maxWidth="xs">
       <Box
         sx={{
-          marginTop: 8,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          backgroundColor: 'white',
+          padding: 3,
+          borderRadius: 2,
+          boxShadow: 3,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <GavelIcon sx={{ fontSize: 40, mr: 2 }} />
-          <Typography component="h1" variant="h5">
-            Kullanıcı Kaydı
-          </Typography>
-        </Box>
-        <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-          <LockOutlinedIcon />
+        <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
+          <GavelRounded />
         </Avatar>
-        {error && <Alert severity="error" sx={{ mt: 2, width: '100%' }}>{error}</Alert>}
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
+          Kayıt Ol
+        </Typography>
+        {error && (
+          <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1 }}>
           <StyledGrid>
             <GridItem>
               <TextField
@@ -149,8 +184,11 @@ export default function Register() {
                 label="Sicil No"
                 name="sicilNo"
                 autoComplete="sicilNo"
-                value={formData.sicilNo}
-                onChange={handleChange}
+                value={formik.values.sicilNo}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.sicilNo && Boolean(formik.errors.sicilNo)}
+                helperText={formik.touched.sicilNo && formik.errors.sicilNo}
               />
             </GridItem>
             <GridItem>
@@ -162,8 +200,14 @@ export default function Register() {
                 type="password"
                 id="password"
                 autoComplete="new-password"
-                value={formData.password}
-                onChange={handleChange}
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.password && Boolean(formik.errors.password)}
+                helperText={
+                  (formik.touched.password && formik.errors.password) ||
+                  'Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter (@$!%*?&) içermelidir'
+                }
               />
             </GridItem>
             <GridItem sm={6}>
@@ -174,8 +218,11 @@ export default function Register() {
                 label="Ad"
                 name="ad"
                 autoComplete="given-name"
-                value={formData.ad}
-                onChange={handleChange}
+                value={formik.values.ad}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.ad && Boolean(formik.errors.ad)}
+                helperText={formik.touched.ad && formik.errors.ad}
               />
             </GridItem>
             <GridItem sm={6}>
@@ -186,8 +233,11 @@ export default function Register() {
                 label="Soyad"
                 name="soyad"
                 autoComplete="family-name"
-                value={formData.soyad}
-                onChange={handleChange}
+                value={formik.values.soyad}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.soyad && Boolean(formik.errors.soyad)}
+                helperText={formik.touched.soyad && formik.errors.soyad}
               />
             </GridItem>
             <GridItem>
@@ -198,8 +248,11 @@ export default function Register() {
                 id="unvan"
                 label="Ünvan"
                 name="unvan"
-                value={formData.unvan}
-                onChange={handleChange}
+                value={formik.values.unvan}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.unvan && Boolean(formik.errors.unvan)}
+                helperText={formik.touched.unvan && formik.errors.unvan}
               >
                 {unvanlar.map((unvan) => (
                   <MenuItem key={unvan} value={unvan}>
@@ -216,8 +269,11 @@ export default function Register() {
                 id="mevcutAdliye"
                 label="Mevcut Adliye"
                 name="mevcutAdliye"
-                value={formData.mevcutAdliye}
-                onChange={handleChange}
+                value={formik.values.mevcutAdliye}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.mevcutAdliye && Boolean(formik.errors.mevcutAdliye)}
+                helperText={formik.touched.mevcutAdliye && formik.errors.mevcutAdliye}
               >
                 {adliyeler.map((adliye) => (
                   <MenuItem key={adliye} value={adliye}>
@@ -227,19 +283,23 @@ export default function Register() {
               </TextField>
             </GridItem>
             <GridItem>
-              <TextField
-                required
-                fullWidth
-                id="iseBaslamaTarihi"
-                label="İşe Başlama Tarihi"
-                name="iseBaslamaTarihi"
-                type="date"
-                value={formData.iseBaslamaTarihi}
-                onChange={handleChange}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
+              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={tr}>
+                <DatePicker
+                  label="İşe Başlama Tarihi"
+                  value={formik.values.iseBaslamaTarihi}
+                  onChange={(newValue: Date | null) => {
+                    formik.setFieldValue('iseBaslamaTarihi', newValue);
+                  }}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      required: true,
+                      error: formik.touched.iseBaslamaTarihi && Boolean(formik.errors.iseBaslamaTarihi),
+                      helperText: formik.touched.iseBaslamaTarihi && formik.errors.iseBaslamaTarihi?.toString()
+                    }
+                  }}
+                />
+              </LocalizationProvider>
             </GridItem>
             <GridItem>
               <Button
@@ -259,6 +319,6 @@ export default function Register() {
           </Box>
         </Box>
       </Box>
-    </Container>
+    </StyledContainer>
   );
 } 
