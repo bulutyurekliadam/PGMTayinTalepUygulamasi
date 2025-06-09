@@ -1,3 +1,4 @@
+// Gerekli React ve Material-UI bileşenlerinin import edilmesi
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -14,25 +15,29 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 
+// Tayin talebi için TypeScript interface tanımı
 interface TayinTalebi {
-  id: number;
-  talepEdilenAdliye: string;
-  basvuruTarihi: string;
-  aciklama: string;
-  talepDurumu: string;
-  degerlendirilmeTarihi: string | null;
-  degerlendirmeNotu: string | null;
-  isOnaylandi: boolean;
+  id: number;                               // Talep ID'si
+  talepEdilenAdliye: string;               // Talep edilen adliye bilgisi
+  basvuruTarihi: string;                   // Başvuru tarihi
+  aciklama: string;                        // Talep açıklaması
+  talepDurumu: string;                     // Talebin durumu (Beklemede, Değerlendirildi vb.)
+  degerlendirilmeTarihi: string | null;    // Değerlendirilme tarihi (varsa)
+  degerlendirmeNotu: string | null;        // Değerlendirme notu (varsa)
+  isOnaylandi: boolean;                    // Talebin onaylanma durumu
 }
 
+// Tarih formatlamak için yardımcı fonksiyon
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return {
+    // Tarihi gün, ay, yıl formatında döndürür (örn: 2 Haziran 2025)
     date: date.toLocaleDateString('tr-TR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     }),
+    // Saati saat:dakika formatında döndürür (örn: 14:30)
     time: date.toLocaleTimeString('tr-TR', {
       hour: '2-digit',
       minute: '2-digit'
@@ -40,10 +45,13 @@ const formatDate = (dateString: string) => {
   };
 };
 
+// Tayin Talepleri ana bileşeni
 const TayinTalepleri = () => {
-  const [talepler, setTalepler] = useState<TayinTalebi[]>([]);
-  const { user } = useAuth();
+  // State tanımlamaları
+  const [talepler, setTalepler] = useState<TayinTalebi[]>([]); // Tayin taleplerini tutan state
+  const { user } = useAuth(); // Kullanıcı bilgilerini AuthContext'ten alma
 
+  // Tayin taleplerini API'den çekme
   useEffect(() => {
     const fetchTalepler = async () => {
       try {
@@ -54,18 +62,21 @@ const TayinTalepleri = () => {
       }
     };
 
+    // Kullanıcı sicil no varsa talepleri getir
     if (user?.sicilNo) {
       fetchTalepler();
     }
-  }, [user?.sicilNo]);
+  }, [user?.sicilNo]); // Sicil no değiştiğinde useEffect tekrar çalışır
 
+  // Talebin durumuna göre chip rengi belirleme
   const getDurumRengi = (durum: string, isOnaylandi: boolean) => {
     if (durum === 'Değerlendirildi') {
-      return isOnaylandi ? 'success' : 'error';
+      return isOnaylandi ? 'success' : 'error'; // Onaylandıysa yeşil, reddedildiyse kırmızı
     }
-    return 'warning';
+    return 'warning'; // Beklemedeyse sarı
   };
 
+  // Bileşen render'ı
   return (
     <div>
       <Typography variant="h6" gutterBottom>
@@ -73,6 +84,7 @@ const TayinTalepleri = () => {
       </Typography>
       <TableContainer component={Paper}>
         <Table>
+          {/* Tablo başlıkları */}
           <TableHead>
             <TableRow>
               <TableCell>Talep ID</TableCell>
@@ -86,8 +98,10 @@ const TayinTalepleri = () => {
               <TableCell>İşlem Notları</TableCell>
             </TableRow>
           </TableHead>
+          {/* Tablo içeriği */}
           <TableBody>
             {talepler.map((talep) => {
+              // Başvuru ve değerlendirme tarihlerini formatlama
               const basvuruTarih = formatDate(talep.basvuruTarihi);
               const degerlendirilmeTarih = talep.degerlendirilmeTarihi ? formatDate(talep.degerlendirilmeTarihi) : null;
               
@@ -95,6 +109,7 @@ const TayinTalepleri = () => {
                 <TableRow key={talep.id}>
                   <TableCell>#{talep.id}</TableCell>
                   <TableCell>
+                    {/* Durumu gösteren chip bileşeni */}
                     <Chip
                       label={talep.talepDurumu}
                       color={getDurumRengi(talep.talepDurumu, talep.isOnaylandi)}
@@ -103,12 +118,14 @@ const TayinTalepleri = () => {
                   <TableCell>{user?.ad} {user?.soyad}</TableCell>
                   <TableCell>{user?.mevcutAdliye}</TableCell>
                   <TableCell>{talep.talepEdilenAdliye}</TableCell>
+                  {/* Başvuru tarihi ve saati */}
                   <TableCell>
                     <Box>
                       <Typography variant="body2">{basvuruTarih.date}</Typography>
                       <Typography variant="caption" color="textSecondary">{basvuruTarih.time}</Typography>
                     </Box>
                   </TableCell>
+                  {/* Değerlendirme tarihi ve saati (varsa) */}
                   <TableCell>
                     {degerlendirilmeTarih ? (
                       <Box>
@@ -129,4 +146,4 @@ const TayinTalepleri = () => {
   );
 };
 
-export default TayinTalepleri; 
+export default TayinTalepleri;

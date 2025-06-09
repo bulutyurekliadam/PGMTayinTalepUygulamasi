@@ -1,3 +1,4 @@
+// Gerekli React ve Material-UI bileşenlerinin import edilmesi
 import React, { useEffect, useState } from 'react';
 import {
   Table,
@@ -16,22 +17,26 @@ import axios from 'axios';
 import { format, parseISO, differenceInYears, differenceInMonths } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
+// Kullanıcı bilgileri için TypeScript interface tanımı
 interface User {
-  id: number;
-  sicilNo: string;
-  ad: string;
-  soyad: string;
-  unvan: string;
-  mevcutAdliye: string;
-  iseBaslamaTarihi: string;
-  isAdmin: boolean;
+  id: number;                 // Kullanıcı ID'si
+  sicilNo: string;           // Sicil numarası
+  ad: string;                // Adı
+  soyad: string;            // Soyadı
+  unvan: string;            // Ünvanı
+  mevcutAdliye: string;     // Çalıştığı adliye
+  iseBaslamaTarihi: string; // İşe başlama tarihi
+  isAdmin: boolean;         // Admin yetkisi durumu
 }
 
+// Admin Kullanıcılar Listesi bileşeni
 const AdminUsers = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
+  // State tanımlamaları
+  const [users, setUsers] = useState<User[]>([]); // Kullanıcı listesini tutan state
+  const [loading, setLoading] = useState(true);   // Yükleme durumu
+  const [error, setError] = useState<string>(''); // Hata mesajı
 
+  // Tarihi formatlamak için yardımcı fonksiyon (örn: 01.06.2025)
   const formatDate = (dateString: string) => {
     try {
       if (!dateString) return '-';
@@ -43,6 +48,7 @@ const AdminUsers = () => {
     }
   };
 
+  // İşe başlama tarihine göre hizmet süresini hesaplayan fonksiyon
   const calculateHizmetSuresi = (iseBaslamaTarihi: string) => {
     try {
       if (!iseBaslamaTarihi) return '-';
@@ -51,6 +57,7 @@ const AdminUsers = () => {
       const years = differenceInYears(today, startDate);
       const months = differenceInMonths(today, startDate) % 12;
       
+      // Sadece ay veya yıl ve ay olarak formatlama
       if (years === 0) {
         return `${months} ay`;
       }
@@ -61,9 +68,11 @@ const AdminUsers = () => {
     }
   };
 
+  // Kullanıcı listesini API'den çekme
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        // Token kontrolü
         const token = localStorage.getItem('token');
         if (!token) {
           setError('Oturum bulunamadı');
@@ -71,6 +80,7 @@ const AdminUsers = () => {
           return;
         }
 
+        // API'den kullanıcıları getirme
         const response = await axios.get('http://localhost:5032/api/users', {
           headers: {
             Authorization: `Bearer ${token}`
@@ -87,8 +97,9 @@ const AdminUsers = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, []); // Component mount olduğunda bir kere çalışır
 
+  // Yükleme durumu gösterimi
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -97,6 +108,7 @@ const AdminUsers = () => {
     );
   }
 
+  // Hata durumu gösterimi
   if (error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
@@ -105,6 +117,7 @@ const AdminUsers = () => {
     );
   }
 
+  // Ana bileşen render'ı
   return (
     <Box sx={{ mt: 3 }}>
       <Typography variant="h5" gutterBottom>
@@ -112,6 +125,7 @@ const AdminUsers = () => {
       </Typography>
       <TableContainer component={Paper}>
         <Table>
+          {/* Tablo başlıkları */}
           <TableHead>
             <TableRow>
               <TableCell>Sicil No</TableCell>
@@ -124,6 +138,7 @@ const AdminUsers = () => {
               <TableCell>Admin</TableCell>
             </TableRow>
           </TableHead>
+          {/* Tablo içeriği */}
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
@@ -144,4 +159,4 @@ const AdminUsers = () => {
   );
 };
 
-export default AdminUsers; 
+export default AdminUsers;
