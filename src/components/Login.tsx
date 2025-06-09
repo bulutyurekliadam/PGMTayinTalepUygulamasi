@@ -12,6 +12,7 @@ import {
   Paper,
   Alert
 } from '@mui/material';
+import GavelIcon from '@mui/icons-material/Gavel';
 import { useAuth } from '../contexts/AuthContext';
 
 const validationSchema = yup.object({
@@ -60,9 +61,12 @@ const Login = () => {
             width: '100%',
           }}
         >
-          <Typography component="h1" variant="h5">
-            Personel Giriş
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+            <GavelIcon sx={{ fontSize: 40, mr: 2 }} />
+            <Typography component="h1" variant="h5">
+              Personel Giriş
+            </Typography>
+          </Box>
           {error && <Alert severity="error" sx={{ mt: 2, width: '100%' }}>{error}</Alert>}
           <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1 }}>
             <TextField

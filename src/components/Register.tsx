@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
 import {
   Avatar,
   Button,
@@ -10,9 +12,11 @@ import {
   Container,
   MenuItem,
   styled,
-  Alert
+  Alert,
+  Grid
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import GavelIcon from '@mui/icons-material/Gavel';
 import api from '../services/api';
 
 const StyledGrid = styled('div')(({ theme }) => ({
@@ -86,11 +90,17 @@ export default function Register() {
   };
 
   const adliyeler = [
-    "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin",
-    "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa",
-    "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan",
-    "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta",
-    "Mersin", "İstanbul", "İzmir", "Kars", "Kastamonu", "Kayseri", "Kırklareli", "Kırşehir"
+    "Adana Adliyesi", "Adıyaman Adliyesi", "Afyonkarahisar Adliyesi", "Ağrı Adliyesi", "Amasya Adliyesi", "Ankara Adliyesi", "Antalya Adliyesi", "Artvin Adliyesi",
+    "Aydın Adliyesi", "Balıkesir Adliyesi", "Bilecik Adliyesi", "Bingöl Adliyesi", "Bitlis Adliyesi", "Bolu Adliyesi", "Burdur Adliyesi", "Bursa Adliyesi",
+    "Çanakkale Adliyesi", "Çankırı Adliyesi", "Çorum Adliyesi", "Denizli Adliyesi", "Diyarbakır Adliyesi", "Edirne Adliyesi", "Elazığ Adliyesi", "Erzincan Adliyesi",
+    "Erzurum Adliyesi", "Eskişehir Adliyesi", "Gaziantep Adliyesi", "Giresun Adliyesi", "Gümüşhane Adliyesi", "Hakkari Adliyesi", "Hatay Adliyesi", "Isparta Adliyesi",
+    "Mersin Adliyesi", "İstanbul Adliyesi", "İzmir Adliyesi", "Kars Adliyesi", "Kastamonu Adliyesi", "Kayseri Adliyesi", "Kırklareli Adliyesi", "Kırşehir Adliyesi",
+    "Kocaeli Adliyesi", "Konya Adliyesi", "Kütahya Adliyesi", "Malatya Adliyesi", "Manisa Adliyesi", "Kahramanmaraş Adliyesi", "Mardin Adliyesi", "Muğla Adliyesi",
+    "Muş Adliyesi", "Nevşehir Adliyesi", "Niğde Adliyesi", "Ordu Adliyesi", "Rize Adliyesi", "Sakarya Adliyesi", "Samsun Adliyesi", "Siirt Adliyesi",
+    "Sinop Adliyesi", "Sivas Adliyesi", "Tekirdağ Adliyesi", "Tokat Adliyesi", "Trabzon Adliyesi", "Tunceli Adliyesi", "Şanlıurfa Adliyesi", "Uşak Adliyesi",
+    "Van Adliyesi", "Yozgat Adliyesi", "Zonguldak Adliyesi", "Aksaray Adliyesi", "Bayburt Adliyesi", "Karaman Adliyesi", "Kırıkkale Adliyesi", "Batman Adliyesi",
+    "Şırnak Adliyesi", "Bartın Adliyesi", "Ardahan Adliyesi", "Iğdır Adliyesi", "Yalova Adliyesi", "Karabük Adliyesi", "Kilis Adliyesi", "Osmaniye Adliyesi",
+    "Düzce Adliyesi"
   ];
 
   const unvanlar = [
@@ -119,12 +129,15 @@ export default function Register() {
           alignItems: 'center',
         }}
       >
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+          <GavelIcon sx={{ fontSize: 40, mr: 2 }} />
+          <Typography component="h1" variant="h5">
+            Kullanıcı Kaydı
+          </Typography>
+        </Box>
         <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
           <LockOutlinedIcon />
         </Avatar>
-        <Typography variant="h5">
-          Kayıt Ol
-        </Typography>
         {error && <Alert severity="error" sx={{ mt: 2, width: '100%' }}>{error}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <StyledGrid>

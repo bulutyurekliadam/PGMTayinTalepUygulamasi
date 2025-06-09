@@ -19,14 +19,17 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
+        console.error('İstek gönderilirken hata:', error);
         return Promise.reject(error);
     }
 );
 
 // Yanıt interceptor'ı
 api.interceptors.response.use(
-    (response) => response,
-    (error) => {
+    (response) => {
+        return response;
+    },
+    async (error) => {
         if (error.response) {
             // Token geçersiz veya süresi dolmuşsa
             if (error.response.status === 401) {
@@ -41,6 +44,10 @@ api.interceptors.response.use(
             // Sunucu hatası
             else if (error.response.status === 500) {
                 console.error('Sunucu hatası:', error.response.data);
+            }
+            // Diğer hatalar
+            else {
+                console.error('API Hatası:', error.response.data);
             }
         } else if (error.request) {
             console.error('Sunucuya ulaşılamadı:', error.request);

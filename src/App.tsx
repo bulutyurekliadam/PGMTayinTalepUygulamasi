@@ -14,7 +14,7 @@ import './App.css';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AdminDashboard from './components/AdminDashboard';
 import AllRequests from './components/AllRequests';
-import Users from './components/Users';
+import AdminUsers from './components/AdminUsers';
 
 // Protected Route bileşeni
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -98,7 +98,7 @@ const App: React.FC = () => {
             <Route path="/admin/users" element={
               <AdminRoute>
                 <Dashboard>
-                  <Users />
+                  <AdminUsers />
                 </Dashboard>
               </AdminRoute>
             } />
