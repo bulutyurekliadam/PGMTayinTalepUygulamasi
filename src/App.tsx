@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme';
@@ -14,27 +14,28 @@ import './App.css';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AdminDashboard from './components/AdminDashboard';
 import AllRequests from './components/AllRequests';
-import AdminUsers from './components/AdminUsers';
 
 // Protected Route bileşeni
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  
+  const location = useLocation();
+
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  
+
   return <>{children}</>;
 };
 
 // Admin Route bileşeni
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  
+  const location = useLocation();
+
   if (!user || !user.isAdmin) {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/dashboard" state={{ from: location }} replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -47,8 +48,8 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/" element={<Navigate to="/login" />} />
             
+            {/* Normal kullanıcı rotaları */}
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard>
@@ -56,7 +57,6 @@ const App: React.FC = () => {
                 </Dashboard>
               </ProtectedRoute>
             } />
-            
             <Route path="/dashboard/profile" element={
               <ProtectedRoute>
                 <Dashboard>
@@ -64,7 +64,6 @@ const App: React.FC = () => {
                 </Dashboard>
               </ProtectedRoute>
             } />
-            
             <Route path="/dashboard/requests" element={
               <ProtectedRoute>
                 <Dashboard>
@@ -72,7 +71,6 @@ const App: React.FC = () => {
                 </Dashboard>
               </ProtectedRoute>
             } />
-            
             <Route path="/dashboard/new-request" element={
               <ProtectedRoute>
                 <Dashboard>
@@ -81,6 +79,7 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } />
 
+            {/* Admin rotaları */}
             <Route path="/admin" element={
               <AdminRoute>
                 <Dashboard>
@@ -95,13 +94,17 @@ const App: React.FC = () => {
                 </Dashboard>
               </AdminRoute>
             } />
-            <Route path="/admin/users" element={
+            <Route path="/admin/profile" element={
               <AdminRoute>
                 <Dashboard>
-                  <AdminUsers />
+                  <Profile />
                 </Dashboard>
               </AdminRoute>
             } />
+
+            {/* Varsayılan yönlendirme */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Router>
       </AuthProvider>

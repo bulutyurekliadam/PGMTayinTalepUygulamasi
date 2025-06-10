@@ -51,7 +51,7 @@ const Dashboard: React.FC<DashboardProps> = ({ children }) => {
   const adminMenuItems = [
     { text: 'Yönetim Paneli', icon: <AdminIcon />, path: '/admin' },
     { text: 'Tüm Talepler', icon: <DescriptionIcon />, path: '/admin/requests' },
-    { text: 'Kullanıcılar', icon: <PersonIcon />, path: '/admin/users' },
+    { text: 'Profilim', icon: <PersonIcon />, path: '/admin/profile' },
   ];
 
   const menuItems = user?.isAdmin ? adminMenuItems : userMenuItems;

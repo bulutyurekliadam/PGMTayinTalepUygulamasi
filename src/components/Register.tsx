@@ -51,14 +51,7 @@ interface FormValues {
 const validationSchema = yup.object({
   sicilNo: yup
     .string()
-    .required('Sicil no zorunludur')
-    .matches(/^[aA][bB]/, 'Sicil no "AB" ile başlamalıdır')
-    .matches(/^[aA][bB][0-9]{6}$/, 'Sicil no "AB" ile başlamalı ve 6 rakam içermelidir')
-    .test('range', 'Sicil no 23000 ile 999999 arasında olmalıdır', (value) => {
-      if (!value) return false;
-      const numericPart = parseInt(value.substring(2));
-      return numericPart >= 23000 && numericPart <= 999999;
-    }),
+    .required('Sicil no zorunludur'),
   password: yup
     .string()
     .required('Şifre zorunludur')

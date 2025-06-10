@@ -1,55 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import {
   Container,
-  Tabs,
-  Tab,
   Box,
   Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Chip
+  Typography
 } from '@mui/material';
 import AllRequests from './AllRequests';
-import Users from './Users';
 import api from '../services/api';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { format } from 'date-fns';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
 interface TalepDurumu {
   beklemede: number;
   onaylandi: number;
   reddedildi: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
 }
 
 const formatDateTime = (dateString: string | undefined | null) => {
@@ -64,7 +30,6 @@ const formatDateTime = (dateString: string | undefined | null) => {
 };
 
 const AdminDashboard: React.FC = () => {
-  const [selectedTab, setSelectedTab] = useState(0);
   const [talepDurumu, setTalepDurumu] = useState<TalepDurumu>({
     beklemede: 0,
     onaylandi: 0,
@@ -95,10 +60,6 @@ const AdminDashboard: React.FC = () => {
     } catch (error) {
       console.error('Talep durumları getirilirken hata:', error);
     }
-  };
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setSelectedTab(newValue);
   };
 
   return (
@@ -154,19 +115,7 @@ const AdminDashboard: React.FC = () => {
         </Box>
       </Box>
 
-      <Box sx={{ width: '100%', mb: 3 }}>
-        <Tabs value={selectedTab} onChange={handleTabChange}>
-          <Tab label="Tayin Talepleri" />
-          <Tab label="Kullanıcılar" />
-        </Tabs>
-      </Box>
-
-      <TabPanel value={selectedTab} index={0}>
-        <AllRequests />
-      </TabPanel>
-      <TabPanel value={selectedTab} index={1}>
-        <Users />
-      </TabPanel>
+      <AllRequests />
     </Container>
   );
 };
