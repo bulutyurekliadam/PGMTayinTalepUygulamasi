@@ -20,6 +20,7 @@ interface AuthContextType {
   login: (sicilNo: string, password: string) => Promise<boolean>; // Giriş fonksiyonu
   logout: () => void;                                       // Çıkış fonksiyonu
   register: (userData: any) => Promise<void>;               // Kayıt fonksiyonu
+  updateUserInfo: (updatedUser: User) => void;              // Kullanıcı bilgilerini güncelleme fonksiyonu
 }
 
 // AuthContext oluşturulması
@@ -104,9 +105,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Kullanıcı bilgilerini güncelleme fonksiyonu
+  const updateUserInfo = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
+
   // Context Provider'ın render edilmesi
   return (
-    <AuthContext.Provider value={{ user, login, logout, register }}>
+    <AuthContext.Provider value={{ user, login, logout, register, updateUserInfo }}>
       {children}
     </AuthContext.Provider>
   );

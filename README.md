@@ -1,103 +1,159 @@
-# Adalet Bakanlığı Tayin Talep Sistemi
+# Personel Tayin Talep Sistemi
 
-Bu proje, Adalet Bakanlığı personelinin tayin taleplerini yönetmek için geliştirilmiş bir web uygulamasıdır. Sistem, personelin tayin taleplerini oluşturmasına, takip etmesine ve yöneticilerin bu talepleri değerlendirmesine olanak sağlar.
+Bu proje, adliyede görev yapan personelin (yazı işleri müdürü, zabıt katibi, mübaşir vb.) başka bir adliyeye tayin talebinde bulunabileceği bir web uygulamasıdır.
+
+## Özellikler
+
+### Kullanıcı İşlemleri
+- Sicil numarası ve şifre ile güvenli giriş
+- Personel bilgilerini görüntüleme ve güncelleme
+- Profil sayfasında kişisel bilgileri kompakt görüntüleme
+- Admin ve normal kullanıcı rolleri
+
+### Tayin Talep İşlemleri
+- Yeni tayin talebi oluşturma
+- Talep türü seçimi (yeni eklenen özellik)
+- 81 il merkezi adliyesi arasından tercih yapabilme
+- Talep açıklaması ekleme
+- Mevcut talepleri listeleme ve durumlarını takip etme
+
+### Admin Paneli
+- Tüm talepleri görüntüleme
+- Talepleri değerlendirme
+- Talep durumunu güncelleme
+- Personel bilgilerini yönetme
 
 ## Teknolojiler
 
 ### Backend
-- .NET Core 7.0
+- ASP.NET Core 7.0
 - Entity Framework Core
 - SQLite Veritabanı
 - JWT Authentication
+- RESTful API
 
 ### Frontend
-- React 18
-- TypeScript
+- React.js
 - Material-UI (MUI)
-- React Router
 - Axios
-- Formik & Yup
-
-## Özellikler
-
-### Kullanıcı Özellikleri
-- Kullanıcı kaydı ve girişi
-- Profil görüntüleme
-- Tayin talebi oluşturma
-- Mevcut talepleri görüntüleme ve takip etme
-
-### Admin Özellikleri
-- Tüm tayin taleplerini görüntüleme
-- Talepleri onaylama/reddetme
-- Talep durumlarını güncelleme
-- Profil yönetimi
-
-## Admin Kullanıcı Bilgileri
-- Kullanıcı Adı: ab23000
-- Şifre: Ab23000*
+- React Router
+- Context API
+- JWT Token yönetimi
 
 ## Kurulum
 
-### Backend (.NET Core)
-1. Proje dizinine gidin:
-```bash
-cd TayinTalepAPI
-```
+### Gereksinimler
+- .NET 7.0 SDK
+- Node.js ve npm
+- Git
 
-2. Bağımlılıkları yükleyin:
+### Backend Kurulum
 ```bash
+# Projeyi klonlayın
+git clone [repo-url]
+
+# API klasörüne gidin
+cd TayinTalepAPI/api
+
+# Bağımlılıkları yükleyin
 dotnet restore
-```
 
-3. Veritabanını güncelleyin:
-```bash
+# Veritabanını oluşturun
 dotnet ef database update
-```
 
-4. Uygulamayı başlatın:
-```bash
+# Uygulamayı başlatın
 dotnet run --urls="http://localhost:5032"
 ```
 
-### Frontend (React)
-1. Proje dizinine gidin:
+### Frontend Kurulum
 ```bash
+# Frontend klasörüne gidin
 cd PGMTayinTalep
-```
 
-2. Bağımlılıkları yükleyin:
-```bash
+# Bağımlılıkları yükleyin
 npm install
-```
 
-3. Uygulamayı başlatın:
-```bash
+# Uygulamayı başlatın
 npm start
 ```
 
-Uygulama http://localhost:3001 adresinde çalışacaktır.
+## Son Güncellemeler
 
-## Kullanım
+### v1.1.0 (10 Haziran 2025)
+- TalepTuru alanı eklendi (backend ve frontend)
+- Profil sayfası yeniden tasarlandı
+  - Kart boyutu küçültüldü (md -> sm)
+  - Ad ve soyad yan yana getirildi
+  - Yazı boyutları ve boşluklar optimize edildi
+  - Daha kompakt ve düzenli görünüm
+- Backend'de namespace hataları düzeltildi
+  - api.Data -> TayinTalepAPI.Data
+  - DataContext -> ApplicationDbContext
 
-### Normal Kullanıcı
-1. Sisteme kayıt olun veya giriş yapın
-2. Ana sayfada mevcut tayin taleplerinizi görüntüleyin
-3. "Yeni Talep" menüsünden yeni bir tayin talebi oluşturun
-4. "Taleplerim" sayfasından mevcut taleplerinizi takip edin
+### v1.0.0 (İlk Sürüm)
+- Temel kullanıcı işlemleri
+- Tayin talep yönetimi
+- Admin paneli
+- Güvenlik önlemleri
+- Responsive tasarım
 
-### Admin Kullanıcı
-1. Admin hesabıyla giriş yapın (örn: ab23000)
-2. Yönetim panelinde tüm talepleri görüntüleyin
-3. Talepleri değerlendirin ve durumlarını güncelleyin
-4. Profilinizi yönetin
+## API Endpoints
 
-## Güvenlik
+### Kullanıcı İşlemleri
+- POST /api/auth/login
+- GET /api/users/profile
+- PUT /api/users/profile
 
+### Tayin Talep İşlemleri
+- POST /api/tayintalep
+- GET /api/tayintalep
+- GET /api/tayintalep/{id}
+- PUT /api/tayintalep/{id}
+
+## Veritabanı Şeması
+
+### Users Tablosu
+- Id (int)
+- SicilNo (string)
+- Password (string)
+- Ad (string)
+- Soyad (string)
+- Unvan (string)
+- MevcutAdliye (string)
+- IseBaslamaTarihi (DateTime)
+- IsAdmin (bool)
+
+### TayinTalepleri Tablosu
+- Id (int)
+- SicilNo (string)
+- TalepEdilenAdliye (string)
+- TalepTuru (string)
+- BasvuruTarihi (DateTime)
+- Aciklama (string)
+- TalepDurumu (string)
+- DegerlendirilmeTarihi (DateTime?)
+- DegerlendirmeNotu (string)
+- IsOnaylandi (bool)
+
+## Güvenlik Önlemleri
 - JWT tabanlı kimlik doğrulama
-- Rol tabanlı yetkilendirme (Admin/Kullanıcı)
-- Güvenli parola yönetimi
+- Şifre hashleme
+- Input validasyonu
 - CORS politikaları
+- XSS koruması
+
+## Performans İyileştirmeleri
+- API response caching
+- Lazy loading
+- Veritabanı indeksleme
+- Frontend bundle optimizasyonu
+
+## Katkıda Bulunma
+1. Fork edin
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add amazing feature'`)
+4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
+5. Pull Request oluşturun
 
 ## Lisans
-
-Bu proje [MIT lisansı](LICENSE) altında lisanslanmıştır.
+Bu proje MIT lisansı altında lisanslanmıştır.

@@ -37,6 +37,7 @@ const NewRequest: React.FC = () => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     talepEdilenAdliye: '',
+    talepTuru: '',
     aciklama: ''
   });
   const [loading, setLoading] = useState(false);
@@ -133,6 +134,24 @@ const NewRequest: React.FC = () => {
                       {adliye}
                     </MenuItem>
                   ))}
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth required>
+                <InputLabel id="talepTuru-label">Talep Türü</InputLabel>
+                <Select
+                  labelId="talepTuru-label"
+                  name="talepTuru"
+                  value={formData.talepTuru}
+                  onChange={handleChange}
+                  label="Talep Türü"
+                >
+                  <MenuItem value="Eş Durumu">Eş Durumu</MenuItem>
+                  <MenuItem value="Sağlık Durumu">Sağlık Durumu</MenuItem>
+                  <MenuItem value="Öğrenim Durumu">Öğrenim Durumu</MenuItem>
+                  <MenuItem value="Can Güvenliği">Can Güvenliği</MenuItem>
+                  <MenuItem value="Olağanüstü Durum">Olağanüstü Durum</MenuItem>
+                  <MenuItem value="Diğer">Diğer</MenuItem>
                 </Select>
               </FormControl>
 

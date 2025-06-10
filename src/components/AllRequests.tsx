@@ -26,6 +26,7 @@ interface TayinTalebi {
   id: number;
   basvuruTarihi: string;
   talepEdilenAdliye: string;
+  talepTuru: string;
   aciklama: string;
   talepDurumu: string;
   degerlendirmeNotu?: string;
@@ -152,6 +153,7 @@ const AllRequests = () => {
               <TableCell>Personel</TableCell>
               <TableCell>Mevcut Adliye</TableCell>
               <TableCell>Talep Edilen Adliye</TableCell>
+              <TableCell>Talep Türü</TableCell>
               <TableCell>Durum</TableCell>
               <TableCell>İşlemler</TableCell>
             </TableRow>
@@ -169,6 +171,7 @@ const AllRequests = () => {
                 </TableCell>
                 <TableCell>{talep.personel.mevcutAdliye}</TableCell>
                 <TableCell>{talep.talepEdilenAdliye}</TableCell>
+                <TableCell>{talep.talepTuru}</TableCell>
                 <TableCell>
                   <StyledChip
                     label={getDurumText(talep.talepDurumu, talep.isOnaylandi)}
@@ -200,6 +203,33 @@ const AllRequests = () => {
               Tayin Talebi Detayı - {selectedTalep.personel.ad} {selectedTalep.personel.soyad}
             </DialogTitle>
             <DialogContent>
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Başvuru Tarihi
+                </Typography>
+                <Typography variant="body1">
+                  {formatDateTime(selectedTalep.basvuruTarihi)}
+                </Typography>
+              </Box>
+
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Talep Türü
+                </Typography>
+                <Typography variant="body1">
+                  {selectedTalep.talepTuru}
+                </Typography>
+              </Box>
+
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Mevcut Adliye
+                </Typography>
+                <Typography variant="body1">
+                  {selectedTalep.personel.mevcutAdliye}
+                </Typography>
+              </Box>
+
               <Box sx={{ mb: 2 }}>
                 <Typography variant="subtitle2" gutterBottom>
                   Sicil No
@@ -211,12 +241,6 @@ const AllRequests = () => {
                   Unvan
                 </Typography>
                 <Typography>{selectedTalep.personel.unvan}</Typography>
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Mevcut Adliye
-                </Typography>
-                <Typography>{selectedTalep.personel.mevcutAdliye}</Typography>
               </Box>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="subtitle2" gutterBottom>

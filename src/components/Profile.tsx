@@ -1,68 +1,86 @@
 import React from 'react';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Container,
+  Divider,
+  Paper,
+} from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
-import { Card, CardContent, Typography, Box } from '@mui/material';
-import '../styles/Profile.css';
 
-const Profile: React.FC = () => {
+const Profile = () => {
   const { user } = useAuth();
 
-  const calculateServiceTime = (startDate: string) => {
-    const start = new Date(startDate);
-    const now = new Date();
-    const years = now.getFullYear() - start.getFullYear();
-    const months = now.getMonth() - start.getMonth();
-    
-    let totalMonths = years * 12 + months;
-    const finalYears = Math.floor(totalMonths / 12);
-    const finalMonths = totalMonths % 12;
-
-    return `${finalYears} yıl ${finalMonths} ay`;
-  };
+  if (!user) {
+    return null;
+  }
 
   return (
-    <div className="profile-container">
-      <Typography variant="h4" gutterBottom>
-        Profilim
-      </Typography>
-      <Card>
-        <CardContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Box>
-              <Typography variant="subtitle1" color="textSecondary">
-                Sicil Numarası
+    <Container maxWidth="sm">
+      <Box sx={{ mt: 4, mb: 4 }}>
+        <Paper elevation={3}>
+          <Card>
+            <CardContent>
+              <Typography variant="h5" component="h1" gutterBottom align="center" sx={{ mb: 3, color: 'primary.main' }}>
+                Profil Bilgileri
               </Typography>
-              <Typography variant="h6">{user?.sicilNo}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="subtitle1" color="textSecondary">
-                Ad Soyad
-              </Typography>
-              <Typography variant="h6">{user?.ad} {user?.soyad}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="subtitle1" color="textSecondary">
-                Unvan
-              </Typography>
-              <Typography variant="h6">{user?.unvan}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="subtitle1" color="textSecondary">
-                Bağlı Bulunduğu Adliye
-              </Typography>
-              <Typography variant="h6">{user?.mevcutAdliye}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="subtitle1" color="textSecondary">
-                Hizmet Süresi
-              </Typography>
-              <Typography variant="h6">
-                {user?.iseBaslamaTarihi ? calculateServiceTime(user.iseBaslamaTarihi) : '-'}
-              </Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-    </div>
+              <Divider sx={{ mb: 3 }} />
+              
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Box sx={{ flex: 1, p: 2, backgroundColor: 'background.default', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                      Ad
+                    </Typography>
+                    <Typography variant="body1">
+                      {user.ad}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ flex: 1, p: 2, backgroundColor: 'background.default', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                      Soyad
+                    </Typography>
+                    <Typography variant="body1">
+                      {user.soyad}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box sx={{ p: 2, backgroundColor: 'background.default', borderRadius: 1 }}>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Sicil Numarası
+                  </Typography>
+                  <Typography variant="body1">
+                    {user.sicilNo}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ p: 2, backgroundColor: 'background.default', borderRadius: 1 }}>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Unvan
+                  </Typography>
+                  <Typography variant="body1">
+                    {user.unvan}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ p: 2, backgroundColor: 'background.default', borderRadius: 1 }}>
+                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                    Mevcut Adliye
+                  </Typography>
+                  <Typography variant="body1">
+                    {user.mevcutAdliye}
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Paper>
+      </Box>
+    </Container>
   );
 };
 
